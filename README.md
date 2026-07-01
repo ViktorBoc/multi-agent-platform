@@ -115,4 +115,27 @@ multi-agent-platform/
 
 ## Streamlit Cloud
 
-A live demo deployment is planned but not yet published.
+`streamlit_app.py` (project root) is a **simplified standalone version** for
+Streamlit Cloud deployment. Differences from the Docker/FastAPI setup:
+
+- No FastAPI backend — the RAG pipeline and agents (`src/rag/document_loader.py`,
+  `src/rag/vector_store.py`, `src/agents/graph.py`) are imported and called
+  directly from the Streamlit process instead of over HTTP.
+- No separate ChromaDB server — the vector store is in-memory, kept in
+  `st.session_state` for the duration of the browser session. Uploaded
+  documents and embeddings are lost when the app restarts or the session ends.
+- The OpenAI API key is read from Streamlit Cloud's secrets manager
+  (`st.secrets["OPENAI_API_KEY"]`) instead of a local `.env` file.
+
+### Deploying
+
+1. Push this repo to GitHub (already done).
+2. On [Streamlit Cloud](https://share.streamlit.io), create a new app pointing
+   at this repo with **main file path** `streamlit_app.py`.
+3. In the app's **Settings → Secrets**, add:
+   ```toml
+   OPENAI_API_KEY = "sk-..."
+   ```
+4. Deploy.
+
+**Live demo:** https://multi-agent-platform.streamlit.app *(placeholder — update once the app is actually deployed and the real URL is known)*

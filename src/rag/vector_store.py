@@ -8,14 +8,17 @@ from langchain_chroma import Chroma
 load_dotenv()
 
 EMBEDDING_MODEL = "text-embedding-3-small"
-CHROMA_HOST = os.getenv("CHROMA_HOST", "localhost")
+CHROMA_HOST = os.getenv("CHROMA_HOST")
 CHROMA_PORT = 8000
 
 
 def create_vector_store(documents):
     embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
-    client = chromadb.HttpClient(host=CHROMA_HOST, port=CHROMA_PORT)
-    vector_store = Chroma.from_documents(documents=documents, embedding=embeddings, client=client)
+    if CHROMA_HOST:
+        client = chromadb.HttpClient(host=CHROMA_HOST, port=CHROMA_PORT)
+        vector_store = Chroma.from_documents(documents=documents, embedding=embeddings, client=client)
+    else:
+        vector_store = Chroma.from_documents(documents=documents, embedding=embeddings)
     return vector_store
 
 
