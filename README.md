@@ -138,4 +138,4 @@ Streamlit Cloud deployment. Differences from the Docker/FastAPI setup:
    ```
 4. Deploy.
 
-**Live demo:** https://multi-agent-platform.streamlit.app *(placeholder — update once the app is actually deployed and the real URL is known)*
+**Live demo:** https://multi-agent-platform.streamlit.app
