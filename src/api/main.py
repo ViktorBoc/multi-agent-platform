@@ -25,6 +25,11 @@ app.add_middleware(
 
 vector_store = None
 
+ALLOWED_EXTENSIONS = {
+    ".pdf", ".docx", ".pptx", ".xlsx", ".html", ".csv", ".json", ".xml",
+    ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff",
+}
+
 
 class QueryRequest(BaseModel):
     query: str
@@ -34,7 +39,13 @@ class QueryRequest(BaseModel):
 async def upload(file: UploadFile = File(...)):
     global vector_store
 
-    suffix = os.path.splitext(file.filename)[1]
+    suffix = os.path.splitext(file.filename)[1].lower()
+    if suffix not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file type '{suffix}'. Allowed: {', '.join(sorted(ALLOWED_EXTENSIONS))}",
+        )
+
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
         tmp.write(await file.read())
         tmp_path = tmp.name
@@ -48,7 +59,7 @@ async def upload(file: UploadFile = File(...)):
     finally:
         os.remove(tmp_path)
 
-    return {"chunks_loaded": len(chunks)}
+    return {"filename": file.filename, "file_type": suffix, "chunks_loaded": len(chunks)}
 
 
 @app.post("/query")

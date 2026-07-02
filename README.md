@@ -1,13 +1,31 @@
 # Multi-Agent Research Platform
 
-A research assistant that answers questions about your PDF documents using a
-pipeline of three collaborating LLM agents. Upload one or more PDFs, ask a
+A research assistant that answers questions about your documents using a
+pipeline of three collaborating LLM agents. Upload one or more documents —
+PDF, Word, PowerPoint, Excel, HTML, CSV, JSON, XML, or images — ask a
 question, and get back a structured, cited report — built on Retrieval
 Augmented Generation (RAG) and LangGraph agent orchestration.
 
+## Supported file formats
+
+Document conversion is handled by [MarkItDown](https://github.com/microsoft/markitdown),
+which converts any supported file to Markdown before chunking:
+
+| Format     | Extensions                          |
+|------------|--------------------------------------|
+| PDF        | `.pdf`                               |
+| Word       | `.docx`                              |
+| PowerPoint | `.pptx`                              |
+| Excel      | `.xlsx`                              |
+| Web/data   | `.html`, `.csv`, `.json`, `.xml`     |
+| Images     | `.jpg`, `.jpeg`, `.png`, `.gif`, `.bmp`, `.tiff` |
+
+Images are described via an OpenAI vision model (`gpt-4o-mini`) since they
+contain no extractable text on their own.
+
 ## How it works
 
-A user uploads PDFs and asks a question. The question and the retrieved
+A user uploads documents and asks a question. The question and the retrieved
 context flow through three agents:
 
 1. **Retrieval Agent** — searches the vector store for the passages most
@@ -37,8 +55,9 @@ flowchart LR
 
 - **Python 3.11+**
 - **LangChain** + **LangGraph** — RAG pipeline and agent orchestration
+- **MarkItDown** — converts PDF, Word, PowerPoint, Excel, HTML, CSV, JSON, XML, and images to Markdown for chunking
 - **ChromaDB** — vector store
-- **OpenAI API** — embeddings (`text-embedding-3-small`) and LLM (`gpt-4o-mini`)
+- **OpenAI API** — embeddings (`text-embedding-3-small`), LLM (`gpt-4o-mini`), and vision (image description via MarkItDown)
 - **FastAPI** + **uvicorn** — backend API
 - **Streamlit** — frontend UI
 - **Docker** + **Docker Compose** — containerization
@@ -71,7 +90,7 @@ This starts three services: `api` (FastAPI, port 8000), `frontend`
 
 | Method | Path      | Description                                                                 |
 |--------|-----------|------------------------------------------------------------------------------|
-| POST   | `/upload` | Accepts a PDF file, chunks it, embeds it, and adds it to the vector store. Returns the number of chunks created. |
+| POST   | `/upload` | Accepts a document (see [Supported file formats](#supported-file-formats)), converts it via MarkItDown, chunks it, embeds it, and adds it to the vector store. Returns 400 for unsupported extensions. Returns `filename`, `file_type`, and `chunks_loaded`. |
 | POST   | `/query`  | Accepts `{"query": "..."}`, runs the agent pipeline, and returns `retrieved_docs`, `analysis`, and `final_report`. Returns 400 if no documents have been uploaded yet. |
 | GET    | `/health` | Returns `{"status": "healthy", "documents_loaded": bool}`.                   |
 
@@ -93,7 +112,7 @@ The three agents are wired together as a `StateGraph` in
 multi-agent-platform/
 ├── src/
 │   ├── rag/
-│   │   ├── document_loader.py    # PDF loading + chunking
+│   │   ├── document_loader.py    # MarkItDown conversion + chunking
 │   │   └── vector_store.py       # ChromaDB + embeddings + retrieval
 │   ├── agents/
 │   │   ├── state.py              # shared AgentState

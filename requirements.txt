@@ -4,6 +4,7 @@ langchain-community
 langchain-chroma
 chromadb
 pypdf
+markitdown[all]
 python-dotenv
 fastapi
 uvicorn

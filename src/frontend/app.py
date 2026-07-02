@@ -13,7 +13,12 @@ if "documents_uploaded" not in st.session_state:
 with st.sidebar:
     st.title("📄 Upload Documents")
     uploaded_files = st.file_uploader(
-        "Vyberte PDF súbory", type="pdf", accept_multiple_files=True
+        "Upload Documents (PDF, Word, PowerPoint, Excel, HTML, CSV, Images)",
+        type=[
+            "pdf", "docx", "pptx", "xlsx", "html", "csv", "json", "xml",
+            "jpg", "jpeg", "png", "gif", "bmp", "tiff",
+        ],
+        accept_multiple_files=True,
     )
 
     if st.button("Upload"):
@@ -23,7 +28,7 @@ with st.sidebar:
             for uploaded_file in uploaded_files:
                 try:
                     files = {
-                        "file": (uploaded_file.name, uploaded_file.getvalue(), "application/pdf")
+                        "file": (uploaded_file.name, uploaded_file.getvalue())
                     }
                     response = requests.post(f"{API_URL}/upload", files=files)
                     if response.status_code == 200:

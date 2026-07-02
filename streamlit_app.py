@@ -20,7 +20,12 @@ if "documents_processed" not in st.session_state:
 with st.sidebar:
     st.title("📄 Upload Documents")
     uploaded_files = st.file_uploader(
-        "Vyberte PDF súbory", type="pdf", accept_multiple_files=True
+        "Upload Documents (PDF, Word, PowerPoint, Excel, HTML, CSV, Images)",
+        type=[
+            "pdf", "docx", "pptx", "xlsx", "html", "csv", "json", "xml",
+            "jpg", "jpeg", "png", "gif", "bmp", "tiff",
+        ],
+        accept_multiple_files=True,
     )
 
     if st.button("Process"):
